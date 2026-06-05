@@ -183,7 +183,7 @@ export default function Home() {
             
             {showWelcome ? (
               /* ─── Welcome State ─────────────────────────────────────── */
-              <div className="flex flex-col items-center justify-center h-full text-center max-w-3xl mx-auto animate-fade-in-up">
+              <div className="flex flex-col items-center justify-center h-full text-center w-full mx-auto animate-fade-in-up">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center mb-8 border border-primary/30 shadow-[0_0_40px_rgba(6,182,212,0.15)] relative">
                   <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl"></div>
                   <span className="material-symbols-outlined text-primary text-4xl relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
@@ -208,7 +208,7 @@ export default function Home() {
               </div>
             ) : (
               /* ─── Chat Messages ─────────────────────────────────────── */
-              <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
+              <div className="flex flex-col gap-6 w-full">
                 {messages.map((msg, idx) => (
                   <div key={idx} className="flex flex-col gap-2">
                     <MessageBubble message={msg} />
@@ -237,7 +237,7 @@ export default function Home() {
 
           {/* ─── Floating Input Bar ──────────────────────────────────── */}
           <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none flex justify-center z-20">
-            <div className="w-full max-w-3xl pointer-events-auto relative">
+            <div className="w-full pointer-events-auto relative">
               <div className="glass-modal rounded-full flex items-center p-1.5 pl-6 pr-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.12)]">
                 <input 
                   className="flex-1 bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/40 typo-body focus:ring-0" 

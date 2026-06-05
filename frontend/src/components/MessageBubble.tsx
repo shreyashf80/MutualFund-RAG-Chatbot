@@ -6,7 +6,7 @@ export default function MessageBubble({ message }: { message: Message }) {
   if (isUser) {
     return (
       <div className="flex justify-end w-full animate-fade-in-up">
-        <div className="max-w-[85%] md:max-w-[70%] bg-gradient-to-br from-primary-container to-primary text-on-primary typo-body p-4 rounded-2xl rounded-tr-sm shadow-[0_8px_30px_rgba(6,182,212,0.25),0_2px_8px_rgba(0,0,0,0.4)]">
+        <div className="max-w-[85%] md:max-w-[65%] bg-gradient-to-br from-primary-container to-primary text-on-primary typo-body p-3 px-4 rounded-xl rounded-tr-sm shadow-[0_4px_20px_rgba(6,182,212,0.2),0_1px_3px_rgba(0,0,0,0.4)]">
           <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
       </div>
@@ -23,7 +23,7 @@ export default function MessageBubble({ message }: { message: Message }) {
       </div>
       
       {/* Bot Message Body */}
-      <div className={`max-w-[85%] md:max-w-[75%] glass-modal p-5 rounded-2xl rounded-tl-sm shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.03)] ${isRefusal ? 'border-error/30 shadow-[inset_4px_0_0_rgba(239,68,68,0.5)]' : ''}`}>
+      <div className={`max-w-[85%] md:max-w-[65%] glass-modal p-4 rounded-xl rounded-tl-sm shadow-[0_4px_24px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)] ${isRefusal ? 'border-error/30 shadow-[inset_4px_0_0_rgba(239,68,68,0.5)]' : ''}`}>
         {isRefusal ? (
           <>
             <div className="flex items-center gap-2 mb-3">
