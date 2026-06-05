@@ -106,7 +106,7 @@ export default function Home() {
   const handleSchemeSelect = (scheme: Scheme) => {
     setMessages([{
       role: "bot",
-      content: `What would you like to know about **${scheme.name}**?`,
+      content: `What would you like to know about ${scheme.name}?`,
       options: [
         { label: "NAV", query: `What is the NAV of ${scheme.name}?` },
         { label: "AUM", query: `What is the AUM of ${scheme.name}?` },
