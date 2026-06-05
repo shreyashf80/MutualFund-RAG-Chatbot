@@ -72,8 +72,12 @@ def format_response(
     answer = _limit_sentences(answer, max_sentences=3)
 
     # ── Clean up stray URL artifacts in the answer text ──────────────
-    # (the citation is returned as a separate field)
-    # We keep URLs in the answer text as the LLM may embed them naturally
+    # If the LLM included the citation URL in the text, we remove it
+    # because the frontend renders a dedicated "Source Link" button.
+    if citation:
+        answer = answer.replace(citation, "").strip()
+        # Also strip out trailing "Source:", "Link:", etc.
+        answer = re.sub(r"(?i)\s*(?:source|link|url):\s*$", "", answer).strip()
 
     return {
         "status": "success",

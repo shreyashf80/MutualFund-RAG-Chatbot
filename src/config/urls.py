@@ -18,7 +18,7 @@ SCHEME_URLS: dict[str, str] = {
     "HDFC Mid Cap Fund Direct Growth": (
         "https://groww.in/mutual-funds/hdfc-mid-cap-fund-direct-growth"
     ),
-    "HDFC Equity Fund Direct Growth": (
+    "HDFC Flexi Cap Fund Direct Growth": (
         "https://groww.in/mutual-funds/hdfc-equity-fund-direct-growth"
     ),
     "HDFC Small Cap Fund Direct Growth": (
