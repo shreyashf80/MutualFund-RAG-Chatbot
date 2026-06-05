@@ -14,7 +14,7 @@ The system strictly adheres to providing *facts only*, pulling real-time data fr
 
 ## 🎯 Key Features
 
-- **Automated Daily Ingestion**: An integrated APScheduler job scrapes 19 HDFC Mutual Fund pages from Groww every day at 10:00 AM IST to ensure the vector database is always up-to-date.
+- **Automated Daily Ingestion**: An integrated **GitHub Actions Cron Job** triggers the `/api/ingest` endpoint every day at 10:00 AM IST to scrape 19 HDFC Mutual Fund pages and keep the vector database up-to-date, saving memory on the backend host.
 - **Strict Guardrails**: Advanced query classification blocks any questions seeking financial advice (e.g., "Should I buy this fund?") and detects/blocks PII.
 - **Verifiable Citations**: Every factual answer includes the exact source URL and the timestamp of when the data was last ingested.
 - **Decoupled Architecture**: A modern **Next.js 15 (React)** interface that seamlessly communicates with the robust FastAPI Python backend.
@@ -90,6 +90,7 @@ The backend is Dockerized for reliable deployment on Railway (which requires spe
 2. Railway will automatically detect the `Dockerfile` and build the image.
 3. **Important**: Add your `GROQ_API_KEY` to the Railway Environment Variables.
 4. Set the internal `PORT` variable if necessary (defaults to 8000).
+5. Railway provides a persistent volume for ChromaDB storage so you don't lose data on restarts.
 
 ### Frontend (Vercel)
 The UI is a Next.js application designed to be hosted seamlessly on Vercel.

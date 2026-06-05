@@ -1,36 +1,40 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
-import MessageBubble, { Message } from "@/components/MessageBubble";
+import MessageBubble from "@/components/MessageBubble";
 import TypingIndicator from "@/components/TypingIndicator";
 
+export interface Scheme {
+  name: string;
+  url: string;
+}
+
+export interface Message {
+  role: "user" | "bot";
+  content: string;
+  type?: string;
+  citation?: string;
+  lastUpdated?: string;
+}
+
 export default function Home() {
-  const [schemes, setSchemes] = useState<{name: string, url: string}[]>([]);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "bot",
-      content: "Hello! I am WealthFact, your AI assistant for HDFC Mutual Funds. I can provide strictly factual information about any of our indexed funds. How can I help you today?"
-    }
-  ]);
+  const [schemes, setSchemes] = useState<Scheme[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const showWelcome = messages.length === 0;
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
   useEffect(() => {
-    // Fetch indexed schemes on mount
     const fetchSchemes = async () => {
       try {
-        const IS_LOCAL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-        // If local, hit port 8000. If prod, you can use env var.
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || (IS_LOCAL ? 'http://127.0.0.1:8000' : '');
-        
-        const response = await fetch(`${API_BASE_URL}/api/schemes`);
+        const response = await fetch('/api/schemes');
         if (response.ok) {
           const data = await response.json();
           if (data && data.schemes) {
@@ -45,20 +49,15 @@ export default function Home() {
     fetchSchemes();
   }, []);
 
-  const handleSend = async () => {
-    const text = inputValue.trim();
-    if (!text) return;
+  const handleQuery = async (text: string) => {
+    if (!text.trim() || isTyping) return;
 
-    // Add user message
     setMessages(prev => [...prev, { role: "user", content: text }]);
     setInputValue("");
     setIsTyping(true);
 
     try {
-      const IS_LOCAL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || (IS_LOCAL ? 'http://127.0.0.1:8000' : '');
-      
-      const response = await fetch(`${API_BASE_URL}/api/query`, {
+      const response = await fetch('/api/query', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: text })
@@ -72,18 +71,23 @@ export default function Home() {
         role: "bot",
         content: data.answer || "I'm sorry, I couldn't process that request.",
         type: data.type,
-        citation: data.citation,
+        citation: data.citation || data.educational_link,
         lastUpdated: data.last_updated
       }]);
       
-    } catch (error) {
+    } catch {
       setMessages(prev => [...prev, {
         role: "bot",
         content: "Network error: Unable to connect to the WealthFact servers. Please try again later.",
+        type: 'refusal'
       }]);
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleSend = () => {
+    handleQuery(inputValue);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -92,67 +96,155 @@ export default function Home() {
     }
   };
 
-  const resetChat = () => {
-    setMessages([
-      {
-        role: "bot",
-        content: "Hello! I am WealthFact, your AI assistant for HDFC Mutual Funds. I can provide strictly factual information about any of our indexed funds. How can I help you today?"
-      }
-    ]);
+  const resetChat = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setMessages([]);
+    setInputValue('');
   };
 
+  const questionTemplates = [
+    (name: string) => `What is the expense ratio of ${name}?`,
+    (name: string) => `What is the exit load for ${name}?`,
+    (name: string) => `Who is the fund manager of ${name}?`,
+    (name: string) => `What is the NAV of ${name}?`,
+    (name: string) => `What is the minimum investment for ${name}?`,
+    (name: string) => `What is the AUM of ${name}?`,
+  ];
+
+  const exampleQuestions = React.useMemo(() => {
+    if (schemes.length === 0) {
+      return [
+        "What is the expense ratio of HDFC Top 100?",
+        "What is the exit load for HDFC Defence Fund?",
+        "Who is the fund manager of HDFC Flexi Cap?"
+      ];
+    }
+    const shuffled = [...schemes].sort(() => Math.random() - 0.5);
+    const picked = shuffled.slice(0, 3);
+    const shuffledTemplates = [...questionTemplates].sort(() => Math.random() - 0.5);
+    return picked.map((scheme, i) => shuffledTemplates[i](scheme.name));
+  }, [schemes]);
+
   return (
-    <div className="flex h-screen w-full bg-background font-sans overflow-hidden text-on-surface">
-      <Sidebar schemes={schemes} onLogoClick={resetChat} />
-
-      <main className="flex-1 flex flex-col h-full relative w-full md:max-w-[calc(100%-20rem)] bg-background">
-        {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-outline/30 bg-surface z-10 shadow-sm">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={resetChat}>
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center p-1.5 shrink-0">
-              <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain" />
+    <div className="h-screen w-full overflow-hidden flex flex-col typo-body antialiased">
+      
+      {/* ─── Top Navigation Bar ────────────────────────────────────────── */}
+      <nav className="w-full z-40 glass-panel flex justify-between items-center px-6 py-4 rounded-none border-b border-white/5 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <button className="md:hidden text-primary p-2 hover:bg-white/5 rounded-full transition-colors" aria-label="Menu">
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <a onClick={resetChat} className="flex items-center gap-3 md:gap-4 cursor-pointer select-none">
+            <img src="/logo.svg" alt="WealthFact Logo" className="w-10 h-10 md:w-12 md:h-12" />
+            <div className="flex flex-col md:flex-row md:items-baseline md:gap-3">
+              <h1 className="text-2xl md:text-[32px] font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-fixed leading-tight">
+                WealthFact
+              </h1>
+              <span className="text-on-surface-variant/60 text-[13px] md:text-sm font-normal tracking-wider mt-0.5 md:mt-0">
+                Instant facts, zero fiction
+              </span>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-primary tracking-tight leading-tight">WealthFact</h1>
+          </a>
+        </div>
+      </nav>
+
+      <div className="flex-1 flex w-full overflow-hidden relative">
+        {/* ─── Sidebar ─────────────────────────────────────────────────── */}
+        <Sidebar schemes={schemes} onNewAnalysis={resetChat} />
+
+        {/* ─── Main Content ────────────────────────────────────────────── */}
+        <main className="flex-1 relative flex flex-col h-full overflow-hidden mb-[64px] md:mb-0">
+          
+          {/* Disclaimer Banner */}
+          <div className={`absolute top-0 left-0 w-full z-30 flex justify-center py-3 pointer-events-none transition-opacity duration-300 ${showWelcome ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className="glass-modal pointer-events-auto flex items-center gap-2 py-1.5 px-4 rounded-full border border-tertiary/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+              <span className="material-symbols-outlined text-tertiary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+              <span className="text-tertiary typo-label">Facts-only · No investment advice</span>
             </div>
           </div>
-        </header>
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-8 md:px-8 custom-scrollbar scroll-smooth">
-          {messages.map((msg, i) => (
-            <MessageBubble key={i} message={msg} />
-          ))}
-          {isTyping && <TypingIndicator />}
-          <div ref={messagesEndRef} className="h-4" />
-        </div>
+          {/* ─── Chat Area ───────────────────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col pt-14">
+            
+            {showWelcome ? (
+              /* ─── Welcome State ─────────────────────────────────────── */
+              <div className="flex flex-col items-center justify-center h-full text-center max-w-3xl mx-auto animate-fade-in-up">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center mb-8 border border-primary/30 shadow-[0_0_40px_rgba(6,182,212,0.15)] relative">
+                  <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl"></div>
+                  <span className="material-symbols-outlined text-primary text-4xl relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4 leading-tight tracking-tight">
+                  How can I assist your analysis today?
+                </h2>
+                <p className="text-on-surface-variant typo-body mb-10 max-w-xl">
+                  Ask questions about mutual fund metrics, performance history, or regulatory details.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {exampleQuestions.map((q, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => handleQuery(q)}
+                      className="px-5 py-2.5 rounded-full border border-primary/20 text-primary typo-body-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-lg hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* ─── Chat Messages ─────────────────────────────────────── */
+              <div className="flex flex-col gap-4 w-full max-w-4xl mx-auto">
+                {messages.map((msg, idx) => (
+                  <MessageBubble key={idx} message={msg} />
+                ))}
+                {isTyping && <TypingIndicator />}
+                <div ref={messagesEndRef} className="h-28 w-full flex-shrink-0" />
+              </div>
+            )}
+            
+          </div>
 
-        {/* Input Area */}
-        <div className="p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent pb-6 md:pb-8">
-          <div className="max-w-3xl mx-auto relative group">
-            <input 
-              type="text" 
-              className="w-full bg-surface border border-outline/40 text-on-surface rounded-full pl-6 pr-14 py-4 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all shadow-sm placeholder:text-on-surface-variant/50 text-[15px]"
-              placeholder="Ask a factual question about HDFC funds..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoComplete="off"
-            />
-            <button 
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isTyping}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary hover:bg-primary-fixed text-on-primary rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:hover:bg-primary cursor-pointer active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[20px] ml-0.5">send</span>
-            </button>
+          {/* ─── Floating Input Bar ──────────────────────────────────── */}
+          <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none flex justify-center z-20">
+            <div className="w-full max-w-3xl pointer-events-auto relative">
+              <div className="glass-modal rounded-full flex items-center p-1.5 pl-6 pr-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.12)]">
+                <input 
+                  className="flex-1 bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/40 typo-body focus:ring-0" 
+                  placeholder="Ask about a scheme..." 
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <button 
+                  onClick={handleSend}
+                  disabled={!inputValue.trim() || isTyping}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary-fixed text-on-primary flex items-center justify-center hover:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all duration-300 ml-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                  aria-label="Send message"
+                >
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                </button>
+              </div>
+              {/* Footer Links */}
+              <div className="hidden md:flex justify-center items-center gap-4 mt-3 opacity-40">
+                <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+                <span className="w-1 h-1 rounded-full bg-on-surface-variant/50"></span>
+                <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Data Privacy</a>
+              </div>
+            </div>
           </div>
-          <div className="text-center mt-3 flex items-center justify-center gap-1.5 text-xs text-on-surface-variant/60">
-            <span className="material-symbols-outlined text-[14px]">info</span>
-            <p>WealthFact provides <span className="font-medium text-on-surface-variant/80">factual information only</span> and cannot offer investment advice.</p>
-          </div>
-        </div>
-      </main>
+
+        </main>
+      </div>
+
+      {/* ─── Mobile Bottom Nav ───────────────────────────────────────── */}
+      <nav className="fixed bottom-0 left-0 w-full md:hidden glass-panel border-t border-white/5 rounded-none z-50 flex justify-around items-center h-[64px]">
+        <a className="flex flex-col items-center justify-center w-full h-full text-primary" href="#">
+          <span className="material-symbols-outlined mb-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>explore</span>
+          <span className="text-[10px] font-medium tracking-wide">Explore</span>
+        </a>
+      </nav>
+
     </div>
   );
 }

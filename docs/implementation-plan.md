@@ -566,8 +566,8 @@ Create project documentation and prepare for deployment.
   - [x] Ensure `requirements.txt` is up-to-date
   - Add `Procfile` or define start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
   - Ensure Chromadb storage path can handle ephemeral Railway storage (or uses Railway Volumes)
-- [ ] Final smoke test locally before deployment: `uvicorn src.api.main:app --reload`
-- [ ] Deploy to respective platforms and configure environment variables (e.g., `GROQ_API_KEY`)
+- [x] Final smoke test locally before deployment: `uvicorn src.api.main:app --reload`
+- [x] Deploy to respective platforms and configure environment variables (e.g., `GROQ_API_KEY`)
 
 ### Acceptance Criteria
 - README is complete and accurate

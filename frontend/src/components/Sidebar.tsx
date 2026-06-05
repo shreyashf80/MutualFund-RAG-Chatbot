@@ -1,74 +1,52 @@
-interface Scheme {
-  name: string;
-  url: string;
-}
+import { Scheme } from "@/app/page";
 
 interface SidebarProps {
   schemes: Scheme[];
-  onLogoClick: () => void;
+  onNewAnalysis: () => void;
 }
 
-export default function Sidebar({ schemes, onLogoClick }: SidebarProps) {
+export default function Sidebar({ schemes, onNewAnalysis }: SidebarProps) {
   return (
-    <nav className="w-80 bg-surface border-r border-outline/30 flex flex-col hidden md:flex transition-all duration-300 relative z-20">
-      <div 
-        className="p-md border-b border-outline/30 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/50 transition-colors duration-200"
-        onClick={onLogoClick}
-      >
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center p-1.5 shrink-0">
-          <img src="/logo.svg" alt="WealthFact Logo" className="w-full h-full object-contain" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-primary tracking-tight">WealthFact</h1>
-          <p className="text-xs text-on-surface-variant/70 font-medium tracking-wide">HDFC MUTUAL FUND</p>
-        </div>
+    <aside className="w-[280px] hidden md:flex flex-col glass-panel rounded-none border-r border-white/5 z-30 flex-shrink-0">
+      {/* Sidebar Header */}
+      <div className="p-5 border-b border-white/5">
+        <h2 className="typo-title-md text-on-surface">Supported Schemes</h2>
       </div>
-
-      <div className="flex-1 overflow-y-auto p-md custom-scrollbar">
-        <h2 className="text-sm font-semibold text-on-surface-variant mb-4 uppercase tracking-wider flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">inventory_2</span>
-          Indexed Schemes
-        </h2>
-        
+      
+      {/* Scheme List */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2 flex flex-col gap-0.5">
         {schemes.length === 0 ? (
-          <div className="text-sm text-on-surface-variant/50 flex items-center gap-2 italic">
-            <span className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></span>
-            Loading schemes...
-          </div>
+          <div className="px-4 py-3 typo-body-sm text-on-surface-variant">Loading schemes…</div>
         ) : (
-          <ul className="space-y-1">
-            {schemes.map((scheme, idx) => (
-              <li key={idx}>
-                <a 
-                  href={scheme.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2 p-2 rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-bright transition-all duration-200 group"
-                  title={scheme.name}
-                >
-                  <span className="material-symbols-outlined text-[16px] mt-0.5 text-primary/50 group-hover:text-primary transition-colors">feed</span>
-                  <span className="line-clamp-2 leading-snug">{scheme.name}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          schemes.map((scheme, idx) => (
+            <a 
+              key={idx}
+              href={scheme.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06] transition-all duration-200 cursor-pointer active:scale-[0.98]"
+            >
+              <img 
+                src="https://assets-netstorage.groww.in/mf-assets/logos/hdfc_groww.png" 
+                alt="" 
+                className="w-5 h-5 rounded-full flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" 
+              />
+              <span className="typo-body-sm font-medium leading-snug">{scheme.name}</span>
+            </a>
+          ))
         )}
-      </div>
+      </nav>
 
-      <a 
-        href="https://github.com/shreyashf80/MutualFund-RAG-Chatbot" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="p-4 border-t border-outline/30 flex items-center gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-bright transition-all duration-200"
-      >
-        <div className="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center shrink-0 border border-outline/30">
-          <span className="material-symbols-outlined text-[18px]">code</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">View Source</span>
-          <span className="text-xs text-on-surface-variant/60">Powered by NextLeap</span>
-        </div>
-      </a>
-    </nav>
+      {/* Footer Action */}
+      <div className="p-4 border-t border-white/5">
+        <button 
+          onClick={onNewAnalysis}
+          className="w-full py-2.5 px-5 rounded-full border border-primary/40 text-primary hover:bg-primary/10 hover:border-primary hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] transition-all duration-300 flex items-center justify-center gap-2 typo-label bg-surface/20 active:scale-[0.97]"
+        >
+          <span className="material-symbols-outlined text-base">add</span>
+          New Analysis
+        </button>
+      </div>
+    </aside>
   );
 }

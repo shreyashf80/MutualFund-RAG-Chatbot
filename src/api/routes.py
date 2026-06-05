@@ -84,10 +84,8 @@ async def process_query(request: QueryRequest):
         
         # b. Check if we have chunks
         if not chunks:
-            from src.generation.response_formatter import _no_info_response
-            response_dict = _no_info_response(chunks)
-            logger.info(f"Query processed in {time.time() - start_time:.2f}s (No Info)")
-            return QueryResponse(**response_dict)
+            logger.warning(f"No chunks retrieved above threshold for query: '{query}'")
+            # Continue to LLM anyway so it can ask for clarification if the query is vague
 
         # c. Build Context
         context = build_context(chunks)
