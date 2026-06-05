@@ -1,0 +1,30 @@
+# Web framework & server
+fastapi==0.115.0
+uvicorn==0.30.6
+
+# HTTP & scraping
+requests==2.32.3
+beautifulsoup4==4.12.3
+
+# LangChain (RAG orchestration)
+langchain==0.3.25
+langchain-community==0.3.25
+
+# Embeddings
+sentence-transformers==3.4.1
+
+# Vector store
+chromadb==0.5.23
+
+# LLM provider
+groq==0.25.0
+
+# Scheduler
+apscheduler==3.10.4
+
+# Environment config
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.2
+httpx==0.28.1
