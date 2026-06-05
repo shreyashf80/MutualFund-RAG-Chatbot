@@ -17,7 +17,7 @@ The system strictly adheres to providing *facts only*, pulling real-time data fr
 - **Automated Daily Ingestion**: An integrated APScheduler job scrapes 19 HDFC Mutual Fund pages from Groww every day at 10:00 AM IST to ensure the vector database is always up-to-date.
 - **Strict Guardrails**: Advanced query classification blocks any questions seeking financial advice (e.g., "Should I buy this fund?") and detects/blocks PII.
 - **Verifiable Citations**: Every factual answer includes the exact source URL and the timestamp of when the data was last ingested.
-- **Decoupled Architecture**: A clean, single-page Vanilla JS/Tailwind interface that seamlessly communicates with the robust FastAPI Python backend.
+- **Decoupled Architecture**: A modern **Next.js 15 (React)** interface that seamlessly communicates with the robust FastAPI Python backend.
 
 ---
 
@@ -62,14 +62,21 @@ Add your Groq API key to the `.env` file:
 GROQ_API_KEY="gsk_your_groq_api_key_here"
 ```
 
-### 3. Run the Backend locally
+### 3. Run the Backend Locally
 Start the FastAPI server:
 ```bash
 uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8000
 ```
-The frontend is served directly by FastAPI at `http://127.0.0.1:8000/`.
-
 *(Note: On first boot, the system will check for vector data. If none exists, you can manually trigger the ingestion via the API below).*
+
+### 4. Run the Frontend Locally
+Open a new terminal, navigate to the `frontend/` directory, and start the Next.js development server:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend UI will be available at `http://localhost:3000/`.
 
 ---
 
@@ -85,10 +92,13 @@ The backend is Dockerized for reliable deployment on Railway (which requires spe
 4. Set the internal `PORT` variable if necessary (defaults to 8000).
 
 ### Frontend (Vercel)
-The UI can be hosted independently on Vercel as a static site.
+The UI is a Next.js application designed to be hosted seamlessly on Vercel.
 1. Create a new Vercel project and connect the repo.
-2. Set the "Root Directory" to `frontend`.
-3. **Important**: Open `frontend/index.html` and update the `API_BASE_URL` constant (around line 220) to point to your deployed Railway backend URL (e.g., `https://your-app.up.railway.app`).
+2. Ensure the **Framework Preset** is set to "Next.js".
+3. Set the "Root Directory" to `frontend`.
+4. **Important**: Add a new Environment Variable in the Vercel dashboard:
+   - Name: `NEXT_PUBLIC_API_BASE_URL`
+   - Value: `https://your-app.up.railway.app` (Your deployed Railway backend URL).
 
 ---
 
