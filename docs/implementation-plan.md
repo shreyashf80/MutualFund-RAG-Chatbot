@@ -539,7 +539,7 @@ Create project documentation and prepare for deployment.
 ### Tasks
 
 #### 9.1 README.md
-- [ ] Write comprehensive README with:
+- [x] Write comprehensive README with:
   - Project overview and purpose
   - Selected AMC: **HDFC Mutual Fund** (19 schemes)
   - Architecture overview (RAG approach with Groq)
@@ -550,20 +550,20 @@ Create project documentation and prepare for deployment.
   - Disclaimer: "Facts-only. No investment advice."
 
 #### 9.2 Environment Setup Guide
-- [ ] Document Groq API key setup
-- [ ] Document Python version requirements
-- [ ] Document ChromaDB storage path configuration
+- [x] Document Groq API key setup
+- [x] Document Python version requirements
+- [x] Document ChromaDB storage path configuration
 
 #### 9.3 Deployment Preparation & Git Push
-- [ ] Initialize git repository (if not done)
-- [ ] Add remote origin: `git remote add origin https://github.com/shreyashf80/MutualFund-RAG-Chatbot.git`
-- [ ] Commit all changes and push to `main` branch
-- [ ] **Frontend Configuration (Vercel)**:
-  - Update frontend to use a configurable `API_BASE_URL` (currently hardcoded to relative `/api`)
-  - Set up `vercel.json` for routing if necessary
-- [ ] **Backend Configuration (Railway)**:
+- [x] Initialize git repository (if not done)
+- [x] Add remote origin: `git remote add origin https://github.com/shreyashf80/MutualFund-RAG-Chatbot.git`
+- [x] Commit all changes and push to `main` branch
+- [x] **Frontend Configuration (Vercel)**:
+  - [x] Update frontend to use a configurable `API_BASE_URL` (currently hardcoded to relative `/api`)
+  - [x] Set up `vercel.json` for routing if necessary (skipped as CORS is enabled and API_BASE_URL handles it)
+- [x] **Backend Configuration (Railway)**:
   - [x] Create `Dockerfile` and `.dockerignore` for reliable deployment (handling ChromaDB sqlite3 dependencies)
-  - Ensure `requirements.txt` is up-to-date
+  - [x] Ensure `requirements.txt` is up-to-date
   - Add `Procfile` or define start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
   - Ensure Chromadb storage path can handle ephemeral Railway storage (or uses Railway Volumes)
 - [ ] Final smoke test locally before deployment: `uvicorn src.api.main:app --reload`

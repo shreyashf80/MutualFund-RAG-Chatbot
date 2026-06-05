@@ -14,7 +14,6 @@ from fastapi.staticfiles import StaticFiles
 from src.api.routes import router
 from src.config.settings import ensure_data_dirs
 from src.ingestion.embedder import get_vectorstore
-from src.ingestion.scheduler import init_scheduler, shutdown_scheduler
 
 # Configure standard library logging for the app
 logging.basicConfig(
@@ -44,13 +43,11 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize vector store on startup: {e}")
         # We don't raise here; if it fails, it will retry on the first query
         
-    # Start the background scheduler
-    init_scheduler()
+    # Start the background scheduler (REMOVED: relying on GitHub Actions instead)
 
     yield
     
     logger.info("Shutting down API...")
-    shutdown_scheduler()
 
 
 app = FastAPI(
