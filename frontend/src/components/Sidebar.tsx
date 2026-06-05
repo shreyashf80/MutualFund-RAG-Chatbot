@@ -3,9 +3,10 @@ import { Scheme } from "@/app/page";
 interface SidebarProps {
   schemes: Scheme[];
   onNewAnalysis: () => void;
+  onSchemeSelect?: (scheme: Scheme) => void;
 }
 
-export default function Sidebar({ schemes, onNewAnalysis }: SidebarProps) {
+export default function Sidebar({ schemes, onNewAnalysis, onSchemeSelect }: SidebarProps) {
   return (
     <aside className="w-[280px] hidden md:flex flex-col glass-panel rounded-none border-r border-white/5 z-30 flex-shrink-0">
       {/* Sidebar Header */}
@@ -21,9 +22,7 @@ export default function Sidebar({ schemes, onNewAnalysis }: SidebarProps) {
           schemes.map((scheme, idx) => (
             <a 
               key={idx}
-              href={scheme.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
+              onClick={(e) => { e.preventDefault(); onSchemeSelect?.(scheme); }}
               className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06] transition-all duration-200 cursor-pointer active:scale-[0.98]"
             >
               <img 

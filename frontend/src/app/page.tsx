@@ -16,6 +16,7 @@ export interface Message {
   type?: string;
   citation?: string;
   lastUpdated?: string;
+  options?: { label: string, query: string }[];
 }
 
 export default function Home() {
@@ -102,6 +103,20 @@ export default function Home() {
     setInputValue('');
   };
 
+  const handleSchemeSelect = (scheme: Scheme) => {
+    setMessages([{
+      role: "bot",
+      content: `What would you like to know about **${scheme.name}**?`,
+      options: [
+        { label: "NAV", query: `What is the NAV of ${scheme.name}?` },
+        { label: "AUM", query: `What is the AUM of ${scheme.name}?` },
+        { label: "Fund Manager", query: `Who is the fund manager of ${scheme.name}?` },
+        { label: "Expense Ratio", query: `What is the expense ratio of ${scheme.name}?` }
+      ]
+    }]);
+    setInputValue('');
+  };
+
   const questionTemplates = [
     (name: string) => `What is the expense ratio of ${name}?`,
     (name: string) => `What is the exit load for ${name}?`,
@@ -150,7 +165,7 @@ export default function Home() {
 
       <div className="flex-1 flex w-full overflow-hidden relative">
         {/* ─── Sidebar ─────────────────────────────────────────────────── */}
-        <Sidebar schemes={schemes} onNewAnalysis={resetChat} />
+        <Sidebar schemes={schemes} onNewAnalysis={resetChat} onSchemeSelect={handleSchemeSelect} />
 
         {/* ─── Main Content ────────────────────────────────────────────── */}
         <main className="flex-1 relative flex flex-col h-full overflow-hidden mb-[64px] md:mb-0">
@@ -193,9 +208,25 @@ export default function Home() {
               </div>
             ) : (
               /* ─── Chat Messages ─────────────────────────────────────── */
-              <div className="flex flex-col gap-4 w-full max-w-4xl mx-auto">
+              <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
                 {messages.map((msg, idx) => (
-                  <MessageBubble key={idx} message={msg} />
+                  <div key={idx} className="flex flex-col gap-2">
+                    <MessageBubble message={msg} />
+                    {msg.options && (
+                      <div className="flex flex-wrap gap-2 mt-1 ml-0 md:ml-[52px]">
+                        {msg.options.map((opt, oIdx) => (
+                          <button
+                            key={oIdx}
+                            onClick={() => handleQuery(opt.query)}
+                            disabled={isTyping}
+                            className="px-4 py-1.5 rounded-full border border-primary/20 text-primary text-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
                 {isTyping && <TypingIndicator />}
                 <div ref={messagesEndRef} className="h-28 w-full flex-shrink-0" />
