@@ -10,8 +10,9 @@ export default function Sidebar({ schemes, onNewAnalysis, onSchemeSelect }: Side
   return (
     <aside className="w-[280px] hidden md:flex flex-col glass-panel rounded-none border-r border-white/5 z-30 flex-shrink-0">
       {/* Sidebar Header */}
-      <div className="p-5 border-b border-white/5">
-        <h2 className="typo-title-md text-on-surface">Supported Schemes</h2>
+      <div className="pt-6 pb-4 px-5 flex items-center gap-2.5 border-b border-white/5">
+        <span className="material-symbols-outlined text-primary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
+        <h2 className="typo-label text-on-surface-variant">Supported Schemes</h2>
       </div>
       
       {/* Scheme List */}
