@@ -66,7 +66,13 @@ def embed_chunks(chunks: List[Dict]):
     
     ids = [chunk["metadata"]["chunk_id"] for chunk in chunks]
     
-    vectorstore.add_documents(documents=documents, ids=ids)
+    # Process in small batches to prevent Out Of Memory (OOM) errors on 500MB Railway containers
+    batch_size = 10
+    for i in range(0, len(documents), batch_size):
+        batch_docs = documents[i:i + batch_size]
+        batch_ids = ids[i:i + batch_size]
+        logger.info(f"Adding batch {i//batch_size + 1} (size: {len(batch_docs)})...")
+        vectorstore.add_documents(documents=batch_docs, ids=batch_ids)
     
     logger.info("Successfully embedded chunks and updated vector store.")
 
