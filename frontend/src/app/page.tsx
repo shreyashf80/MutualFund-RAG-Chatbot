@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import TypingIndicator from "@/components/TypingIndicator";
+import About from "@/components/About";
 
 export interface Scheme {
   name: string;
@@ -24,6 +25,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [currentView, setCurrentView] = useState<"chat" | "about">("chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const showWelcome = messages.length === 0;
@@ -101,6 +103,7 @@ export default function Home() {
     if (e) e.preventDefault();
     setMessages([]);
     setInputValue('');
+    setCurrentView("chat");
   };
 
   const handleSchemeSelect = (scheme: Scheme) => {
@@ -165,105 +168,117 @@ export default function Home() {
 
       <div className="flex-1 flex w-full overflow-hidden relative">
         {/* ─── Sidebar ─────────────────────────────────────────────────── */}
-        <Sidebar schemes={schemes} onNewAnalysis={resetChat} onSchemeSelect={handleSchemeSelect} />
+        <Sidebar 
+          schemes={schemes} 
+          onNewAnalysis={resetChat} 
+          onSchemeSelect={handleSchemeSelect} 
+          onViewChange={setCurrentView}
+          currentView={currentView}
+        />
 
         {/* ─── Main Content ────────────────────────────────────────────── */}
         <main className="flex-1 relative flex flex-col h-full overflow-hidden mb-[64px] md:mb-0">
           
-          {/* Disclaimer Banner */}
-          <div className={`absolute top-0 left-0 w-full z-30 flex justify-center py-3 pointer-events-none transition-opacity duration-300 ${showWelcome ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <div className="glass-modal pointer-events-auto flex items-center gap-2 py-1.5 px-4 rounded-full border border-tertiary/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
-              <span className="material-symbols-outlined text-tertiary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
-              <span className="text-tertiary typo-label">Facts-only · No investment advice</span>
-            </div>
-          </div>
-
-          {/* ─── Chat Area ───────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col pt-14">
-            
-            {showWelcome ? (
-              /* ─── Welcome State ─────────────────────────────────────── */
-              <div className="flex flex-col items-center justify-center h-full text-center w-full mx-auto animate-fade-in-up">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center mb-8 border border-primary/30 shadow-[0_0_40px_rgba(6,182,212,0.15)] relative">
-                  <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl"></div>
-                  <span className="material-symbols-outlined text-primary text-4xl relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4 leading-tight tracking-tight">
-                  How can I assist your analysis today?
-                </h2>
-                <p className="text-on-surface-variant typo-body mb-10 max-w-xl">
-                  Ask questions about mutual fund metrics, performance history, or regulatory details.
-                </p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {exampleQuestions.map((q, idx) => (
-                    <button 
-                      key={idx}
-                      onClick={() => handleQuery(q)}
-                      className="px-5 py-2.5 rounded-full border border-primary/20 text-primary typo-body-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-lg hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                    >
-                      {q}
-                    </button>
-                  ))}
+          {currentView === "about" ? (
+            <About />
+          ) : (
+            <>
+              {/* Disclaimer Banner */}
+              <div className={`absolute top-0 left-0 w-full z-30 flex justify-center py-3 pointer-events-none transition-opacity duration-300 ${showWelcome ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className="glass-modal pointer-events-auto flex items-center gap-2 py-1.5 px-4 rounded-full border border-tertiary/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                  <span className="material-symbols-outlined text-tertiary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                  <span className="text-tertiary typo-label">Facts-only · No investment advice</span>
                 </div>
               </div>
-            ) : (
-              /* ─── Chat Messages ─────────────────────────────────────── */
-              <div className="flex flex-col gap-6 w-full">
-                {messages.map((msg, idx) => (
-                  <div key={idx} className="flex flex-col gap-2">
-                    <MessageBubble message={msg} />
-                    {msg.options && (
-                      <div className="flex flex-wrap gap-2 mt-1 ml-0 md:ml-[52px]">
-                        {msg.options.map((opt, oIdx) => (
-                          <button
-                            key={oIdx}
-                            onClick={() => handleQuery(opt.query)}
-                            disabled={isTyping}
-                            className="px-4 py-1.5 rounded-full border border-primary/20 text-primary text-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+
+              {/* ─── Chat Area ───────────────────────────────────────────── */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col pt-14">
+                
+                {showWelcome ? (
+                  /* ─── Welcome State ─────────────────────────────────────── */
+                  <div className="flex flex-col items-center justify-center h-full text-center w-full mx-auto animate-fade-in-up">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center mb-8 border border-primary/30 shadow-[0_0_40px_rgba(6,182,212,0.15)] relative">
+                      <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl"></div>
+                      <span className="material-symbols-outlined text-primary text-4xl relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4 leading-tight tracking-tight">
+                      How can I assist your analysis today?
+                    </h2>
+                    <p className="text-on-surface-variant typo-body mb-10 max-w-xl">
+                      Ask questions about mutual fund metrics, performance history, or regulatory details.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {exampleQuestions.map((q, idx) => (
+                        <button 
+                          key={idx}
+                          onClick={() => handleQuery(q)}
+                          className="px-5 py-2.5 rounded-full border border-primary/20 text-primary typo-body-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-lg hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                ))}
-                {isTyping && <TypingIndicator />}
-                <div ref={messagesEndRef} className="h-28 w-full flex-shrink-0" />
+                ) : (
+                  /* ─── Chat Messages ─────────────────────────────────────── */
+                  <div className="flex flex-col gap-6 w-full">
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className="flex flex-col gap-2">
+                        <MessageBubble message={msg} />
+                        {msg.options && (
+                          <div className="flex flex-wrap gap-2 mt-1 ml-0 md:ml-[52px]">
+                            {msg.options.map((opt, oIdx) => (
+                              <button
+                                key={oIdx}
+                                onClick={() => handleQuery(opt.query)}
+                                disabled={isTyping}
+                                className="px-4 py-1.5 rounded-full border border-primary/20 text-primary text-sm hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 glass-modal shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {isTyping && <TypingIndicator />}
+                    <div ref={messagesEndRef} className="h-28 w-full flex-shrink-0" />
+                  </div>
+                )}
+                
               </div>
-            )}
-            
-          </div>
 
-          {/* ─── Floating Input Bar ──────────────────────────────────── */}
-          <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none flex justify-center z-20">
-            <div className="w-full pointer-events-auto relative">
-              <div className="glass-modal rounded-full flex items-center p-1.5 pl-6 pr-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.12)]">
-                <input 
-                  className="flex-1 bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/40 typo-body focus:ring-0" 
-                  placeholder="Ask about a scheme..." 
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-                <button 
-                  onClick={handleSend}
-                  disabled={!inputValue.trim() || isTyping}
-                  className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary-fixed text-on-primary flex items-center justify-center hover:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all duration-300 ml-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-                  aria-label="Send message"
-                >
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
-                </button>
+              {/* ─── Floating Input Bar ──────────────────────────────────── */}
+              <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none flex justify-center z-20">
+                <div className="w-full pointer-events-auto relative">
+                  <div className="glass-modal rounded-full flex items-center p-1.5 pl-6 pr-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.12)]">
+                    <input 
+                      className="flex-1 bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/40 typo-body focus:ring-0" 
+                      placeholder="Ask about a scheme..." 
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                    <button 
+                      onClick={handleSend}
+                      disabled={!inputValue.trim() || isTyping}
+                      className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary-fixed text-on-primary flex items-center justify-center hover:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all duration-300 ml-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                      aria-label="Send message"
+                    >
+                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                    </button>
+                  </div>
+                  {/* Footer Links */}
+                  <div className="hidden md:flex justify-center items-center gap-4 mt-3 opacity-40">
+                    <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+                    <span className="w-1 h-1 rounded-full bg-on-surface-variant/50"></span>
+                    <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Data Privacy</a>
+                  </div>
+                </div>
               </div>
-              {/* Footer Links */}
-              <div className="hidden md:flex justify-center items-center gap-4 mt-3 opacity-40">
-                <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
-                <span className="w-1 h-1 rounded-full bg-on-surface-variant/50"></span>
-                <a className="typo-label text-on-surface-variant hover:text-primary transition-colors" href="#">Data Privacy</a>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
 
         </main>
       </div>
