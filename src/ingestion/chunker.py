@@ -54,8 +54,11 @@ def chunk_text(text: str, base_metadata: dict) -> List[Dict]:
     
     # Chunk 1: Key Metrics & Overview
     if sections["Key Metrics & Overview"]:
+        content = "\n".join(sections["Key Metrics & Overview"]).strip()
+        if not content.startswith("Scheme Name:"):
+            content = f"Scheme Name: {scheme_name}\n" + content
         chunk = {
-            "page_content": "\n".join(sections["Key Metrics & Overview"]).strip(),
+            "page_content": content,
             "metadata": {
                 **base_metadata,
                 "chunk_id": f"{base_id}-metrics",
@@ -66,8 +69,9 @@ def chunk_text(text: str, base_metadata: dict) -> List[Dict]:
         
     # Chunk 2: Investment Objective
     if sections["Investment Objective"]:
+        content = "\n".join(sections["Investment Objective"]).strip()
         chunk = {
-            "page_content": "\n".join(sections["Investment Objective"]).strip(),
+            "page_content": f"Scheme Name: {scheme_name}\n" + content,
             "metadata": {
                 **base_metadata,
                 "chunk_id": f"{base_id}-objective",
@@ -78,8 +82,9 @@ def chunk_text(text: str, base_metadata: dict) -> List[Dict]:
         
     # Chunk 3: Exit Load & Tax Implications
     if sections["Exit Load & Tax Implications"]:
+        content = "\n".join(sections["Exit Load & Tax Implications"]).strip()
         chunk = {
-            "page_content": "\n".join(sections["Exit Load & Tax Implications"]).strip(),
+            "page_content": f"Scheme Name: {scheme_name}\n" + content,
             "metadata": {
                 **base_metadata,
                 "chunk_id": f"{base_id}-exit-load",
@@ -96,10 +101,11 @@ def chunk_text(text: str, base_metadata: dict) -> List[Dict]:
     # Manager lines usually start with "1. Name...", "2. Name..."
     for line in manager_lines:
         stripped_line = line.strip()
-        if stripped_line and stripped_line[0].isdigit() and stripped_line[1:3] in [". ", ".	"]:
+        if stripped_line and stripped_line[0].isdigit() and stripped_line[1:3] in [". ", ".\t"]:
             if current_manager:
+                content = "\n".join(current_manager).strip()
                 chunk = {
-                    "page_content": "\n".join(current_manager).strip(),
+                    "page_content": f"Scheme Name: {scheme_name}\n" + content,
                     "metadata": {
                         **base_metadata,
                         "chunk_id": f"{base_id}-manager-{manager_count}",
@@ -114,8 +120,9 @@ def chunk_text(text: str, base_metadata: dict) -> List[Dict]:
                 current_manager.append(line)
                 
     if current_manager:
+        content = "\n".join(current_manager).strip()
         chunk = {
-            "page_content": "\n".join(current_manager).strip(),
+            "page_content": f"Scheme Name: {scheme_name}\n" + content,
             "metadata": {
                 **base_metadata,
                 "chunk_id": f"{base_id}-manager-{manager_count}",
