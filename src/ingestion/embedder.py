@@ -77,19 +77,22 @@ def rebuild_index(chunks: List[Dict]):
     Args:
         chunks (List[Dict]): Fresh chunks to embed.
     """
-    logger.info("Rebuilding index: clearing existing vector store...")
+    logger.info("Rebuilding index: clearing existing vector store collection...")
     
-    if os.path.exists(CHROMA_PERSIST_DIR):
-        try:
-            shutil.rmtree(CHROMA_PERSIST_DIR)
-            logger.info(f"Deleted existing vector store at {CHROMA_PERSIST_DIR}")
-            global _vectorstore_instance
-            _vectorstore_instance = None
-        except Exception as e:
-            logger.error(f"Error deleting vector store: {e}")
-            
-    # Recreate directory
-    os.makedirs(CHROMA_PERSIST_DIR, exist_ok=True)
+    vectorstore = get_vectorstore()
+    
+    # Safely clear the collection without deleting the underlying directory
+    try:
+        # Get all existing document IDs
+        existing_data = vectorstore.get()
+        existing_ids = existing_data.get("ids", [])
+        
+        if existing_ids:
+            # Delete them in batches if necessary, or all at once
+            vectorstore.delete(ids=existing_ids)
+            logger.info(f"Deleted {len(existing_ids)} old chunks from vector store.")
+    except Exception as e:
+        logger.error(f"Error clearing vector store: {e}")
     
     embed_chunks(chunks)
     logger.info("Index rebuild complete.")
