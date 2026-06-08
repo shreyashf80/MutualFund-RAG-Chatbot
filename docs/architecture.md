@@ -213,7 +213,7 @@ listed on Groww. You MUST follow these rules strictly:
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **Frontend** | HTML + CSS + JavaScript | Minimal chat UI |
+| **Frontend** | Next.js (React) + Tailwind CSS | Chat UI, Sidebar, About Page |
 | **Backend** | Python (FastAPI) | API server, query orchestration |
 | **Scheduler** | `APScheduler` or system `cron` | Daily 10 AM IST ingestion trigger |
 | **Embedding** | `sentence-transformers` | Text → vector conversion |
@@ -221,6 +221,7 @@ listed on Groww. You MUST follow these rules strictly:
 | **LLM** | **Groq** (Llama 3.3 70B / Llama 3.1 8B) | Ultra-fast response generation via Groq LPU |
 | **Scraping** | BeautifulSoup + requests | Data ingestion from Groww URLs |
 | **Orchestration** | LangChain | RAG pipeline wiring |
+| **Deployment** | Vercel (Frontend) + Railway (Backend) | Scalable edge delivery and persistent API |
 
 ---
 
@@ -407,37 +408,27 @@ sequenceDiagram
 ### Layout
 
 ```
-┌─────────────────────────────────────────────┐
-│  🏦 Mutual Fund FAQ Assistant               │
-│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  ⚠️ Facts-only. No investment advice.        │
-│                                             │
-│  Welcome! Ask me factual questions about    │
-│  HDFC mutual fund schemes. Try:             │
-│                                             │
-│  💡 "What is the expense ratio of HDFC      │
-│      Mid Cap Fund?"                         │
-│  💡 "What is the exit load for HDFC Small   │
-│      Cap Fund?"                             │
-│  💡 "Who is the fund manager of HDFC        │
-│      Equity Fund?"                          │
-│                                             │
-│  ┌─────────────────────────────────────┐    │
-│  │ User: What is the minimum SIP for   │    │
-│  │       HDFC Nifty 50 Index Fund?     │    │
-│  └─────────────────────────────────────┘    │
-│  ┌─────────────────────────────────────┐    │
-│  │ Bot: The minimum SIP amount for     │    │
-│  │ HDFC Nifty 50 Index Fund Direct     │    │
-│  │ Growth is ₹100.                     │    │
-│  │ 🔗 Source                           │    │
-│  │ Last updated from sources: June 3   │    │
-│  └─────────────────────────────────────┘    │
-│                                             │
-│  ┌───────────────────────────────┐ [Send]   │
-│  │ Type your question...         │          │
-│  └───────────────────────────────┘          │
-└─────────────────────────────────────────────┘
+┌─────────────────────────┬───────────────────────────────────────────┐
+│ [Add] New Analysis      │  ⚠️ Facts-only. No investment advice.       │
+│                         │                                           │
+│ Supported Schemes       │  Welcome! Ask me factual questions about  │
+│ ├ HDFC Mid Cap          │  HDFC mutual fund schemes. Try:           │
+│ ├ HDFC Small Cap        │                                           │
+│ ├ HDFC Equity           │  💡 "What is the expense ratio..."          │
+│ │ ...                   │  💡 "What is the exit load..."              │
+│                         │                                           │
+│                         │  ┌─────────────────────────────────────┐  │
+│                         │  │ User: What is the minimum SIP?      │  │
+│                         │  └─────────────────────────────────────┘  │
+│                         │  ┌─────────────────────────────────────┐  │
+│                         │  │ Bot: The minimum SIP amount is ₹100.│  │
+│                         │  │ 🔗 Source                           │  │
+│ [i] About               │  └─────────────────────────────────────┘  │
+│                         │                                           │
+│                         │  ┌───────────────────────────────┐ [Send] │
+│                         │  │ Ask about a scheme...         │        │
+│                         │  └───────────────────────────────┘        │
+└─────────────────────────┴───────────────────────────────────────────┘
 ```
 
 ---

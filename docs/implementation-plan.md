@@ -397,20 +397,18 @@ Build a minimal, clean chat interface with welcome message, example questions, a
 
 ### Tasks
 
-#### 6.1 HTML Structure (`frontend/index.html`)
-- [x] Create chat UI layout:
-  - Header with title: "🏦 Mutual Fund FAQ Assistant"
+#### 6.1 UI Structure (Next.js & React)
+- [x] Create layout with Sidebar and Main Chat Area:
+  - Sidebar: "New Analysis" button, list of Supported Schemes, and "About" button
+  - Header: Logo and Title ("WealthFact")
   - Disclaimer banner: "⚠️ Facts-only. No investment advice."
-  - Welcome message area
-  - Three clickable example questions:
-    1. "What is the expense ratio of HDFC Mid Cap Fund?"
-    2. "What is the exit load for HDFC Small Cap Fund?"
-    3. "Who is the fund manager of HDFC Equity Fund?"
+  - Welcome message area with example questions
   - Chat message area (scrollable)
   - Input field + send button
+- [x] Create `About.tsx` page outlining platform capabilities and limitations
 
-#### 6.2 Styling (`frontend/index.css`)
-- [x] Clean, minimal design
+#### 6.2 Styling (Tailwind CSS)
+- [x] Clean, minimal glassmorphism design
 - [x] Distinct styling for user messages vs bot messages
 - [x] Styled citation links and "Last updated" footer in bot responses
 - [x] Distinct styling for refusal messages
@@ -555,19 +553,19 @@ Create project documentation and prepare for deployment.
 - [x] Document ChromaDB storage path configuration
 
 #### 9.3 Deployment Preparation & Git Push
-- [x] Initialize git repository (if not done)
+- [x] Initialize git repository
 - [x] Add remote origin: `git remote add origin https://github.com/shreyashf80/MutualFund-RAG-Chatbot.git`
 - [x] Commit all changes and push to `main` branch
 - [x] **Frontend Configuration (Vercel)**:
-  - [x] Update frontend to use a configurable `API_BASE_URL` (currently hardcoded to relative `/api`)
-  - [x] Set up `vercel.json` for routing if necessary (skipped as CORS is enabled and API_BASE_URL handles it)
+  - [x] Configure Next.js environment variable `NEXT_PUBLIC_API_BASE_URL` to point to Railway backend
+  - [x] Generate deployment strategy for Vercel Next.js deployment
 - [x] **Backend Configuration (Railway)**:
   - [x] Create `Dockerfile` and `.dockerignore` for reliable deployment (handling ChromaDB sqlite3 dependencies)
   - [x] Ensure `requirements.txt` is up-to-date
-  - Add `Procfile` or define start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
-  - Ensure Chromadb storage path can handle ephemeral Railway storage (or uses Railway Volumes)
-- [x] Final smoke test locally before deployment: `uvicorn src.api.main:app --reload`
-- [x] Deploy to respective platforms and configure environment variables (e.g., `GROQ_API_KEY`)
+  - [x] Add Persistent Volume to `/app/data` to retain ChromaDB across restarts
+  - [x] Configure `GROQ_API_KEY` in environment variables
+- [x] Final smoke test locally before deployment
+- [x] Deploy to respective platforms
 
 ### Acceptance Criteria
 - README is complete and accurate

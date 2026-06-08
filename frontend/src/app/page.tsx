@@ -152,7 +152,7 @@ export default function Home() {
           <button className="md:hidden text-primary p-2 hover:bg-white/5 rounded-full transition-colors" aria-label="Menu">
             <span className="material-symbols-outlined">menu</span>
           </button>
-          <a onClick={resetChat} className="flex items-center gap-3 md:gap-4 cursor-pointer select-none">
+          <a onClick={resetChat} className="flex items-center gap-1.5 md:gap-2.5 cursor-pointer select-none">
             <img src="/logo.svg" alt="WealthFact Logo" className="w-10 h-10 md:w-12 md:h-12" />
             <div className="flex flex-col md:flex-row md:items-baseline md:gap-3">
               <h1 className="text-2xl md:text-[32px] font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-fixed leading-tight">
