@@ -26,6 +26,7 @@ export default function Home() {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentView, setCurrentView] = useState<"chat" | "about">("chat");
+  const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const showWelcome = messages.length === 0;
@@ -60,10 +61,17 @@ export default function Home() {
     setIsTyping(true);
 
     try {
+      const body: { query: string; scheme_name?: string } = { query: text };
+      // Always scope retrieval to the active scheme so vague questions like
+      // "what is NAV" or "who is fund manager" return data for the correct fund.
+      if (selectedScheme) {
+        body.scheme_name = selectedScheme.name;
+      }
+
       const response = await fetch('/api/query', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: text })
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) throw new Error("API Request Failed");
@@ -104,9 +112,11 @@ export default function Home() {
     setMessages([]);
     setInputValue('');
     setCurrentView("chat");
+    setSelectedScheme(null); // Clear scheme context on reset
   };
 
   const handleSchemeSelect = (scheme: Scheme) => {
+    setSelectedScheme(scheme); // Set active scheme context for scoped retrieval
     setMessages([{
       role: "bot",
       content: `What would you like to know about ${scheme.name}?`,

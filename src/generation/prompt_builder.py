@@ -5,10 +5,11 @@ injecting retrieved context into a structured template.
 """
 
 import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are a facts-only mutual fund FAQ assistant for HDFC mutual fund schemes listed on Groww. You MUST follow these rules strictly:
+SYSTEM_PROMPT_BASE = """You are a facts-only mutual fund FAQ assistant for HDFC mutual fund schemes listed on Groww. You MUST follow these rules strictly:
 
 1. Answer ONLY using information found in the provided context chunks.
 2. Keep responses to a MAXIMUM of 3 sentences.
@@ -18,9 +19,7 @@ SYSTEM_PROMPT = """You are a facts-only mutual fund FAQ assistant for HDFC mutua
 6. NEVER compare fund performance or calculate returns.
 7. If the answer is not found in the context, say exactly "I don't have this information in my current sources." and DO NOT include a citation link.
 8. Include fund management data (fund manager name, tenure) when asked.
-9. If the user's question does NOT mention a specific mutual fund scheme name (e.g. they ask "what is AUM?" or "what is expense ratio?" without specifying which fund), DO NOT guess or pick a random fund. Instead, ask the user to specify which scheme they are asking about. For example: "Could you please specify which HDFC mutual fund scheme you'd like to know the AUM for?"
-10. Only answer about a specific fund if the user clearly names it in their question.
-11. DO NOT include phrases like "For more information, please visit" or "Source:" in your text response. The frontend handles citations automatically."""
+9. DO NOT include phrases like "For more information, please visit" or "Source:" in your text response. The frontend handles citations automatically."""
 
 USER_PROMPT_TEMPLATE = """Context:
 {context}
@@ -32,25 +31,45 @@ User Question: {query}
 Provide a concise, factual answer based ONLY on the context above. Include exactly one source URL and the "Last updated from sources" footer."""
 
 
-def build_prompt(query: str, context: str) -> tuple[str, str]:
+def build_prompt(query: str, context: str, scheme_name: Optional[str] = None) -> tuple[str, str]:
     """
     Build the system and user prompts for the LLM.
 
     Args:
         query: The user's natural-language question.
         context: The assembled context string from the context builder.
+        scheme_name: If provided, an explicit scheme-scope instruction is
+                     added to the system prompt so the LLM answers only
+                     about that specific fund.
 
     Returns:
         A tuple of (system_prompt, user_prompt).
     """
+    system_prompt = SYSTEM_PROMPT_BASE
+    
+    if scheme_name and scheme_name.strip():
+        # User is chatting within a specific fund context
+        system_prompt += f"""
+10. IMPORTANT: The user is currently viewing the fund '{scheme_name.strip()}'. Assume their question is about this fund specifically, even if they do not mention the fund name.
+11. Answer ONLY about '{scheme_name.strip()}'. Do NOT ask the user to specify a fund — the fund is already known.
+12. If the user explicitly asks about a DIFFERENT fund by name, answer about that different fund if data is present, otherwise say you don't have information about it.
+"""
+    else:
+        # User is in global chat context
+        system_prompt += """
+10. If the user's question does NOT mention a specific mutual fund scheme name (e.g. they ask "what is AUM?" or "what is expense ratio?" without specifying which fund), DO NOT guess or pick a random fund. Instead, ask the user to specify which scheme they are asking about. For example: "Could you please specify which HDFC mutual fund scheme you'd like to know the AUM for?"
+11. Only answer about a specific fund if the user clearly names it in their question.
+"""
+
     user_prompt = USER_PROMPT_TEMPLATE.format(
         context=context,
         query=query,
     )
 
     logger.info(
-        f"Built prompt. System: {len(SYSTEM_PROMPT)} chars, "
+        f"Built prompt. System: {len(system_prompt)} chars, "
         f"User: {len(user_prompt)} chars"
+        + (f", Scheme scope: '{scheme_name}'" if scheme_name else "")
     )
 
-    return SYSTEM_PROMPT, user_prompt
+    return system_prompt, user_prompt

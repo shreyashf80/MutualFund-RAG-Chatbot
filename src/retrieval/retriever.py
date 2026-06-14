@@ -5,6 +5,7 @@ to find the most relevant chunks.
 """
 
 import logging
+import math
 from typing import List, Dict, Optional
 
 from src.ingestion.embedder import get_vectorstore
@@ -35,25 +36,25 @@ def retrieve(
     query: str,
     top_k: Optional[int] = None,
     threshold: Optional[float] = None,
+    scheme_name: Optional[str] = None,
 ) -> List[Dict]:
     """
     Embed the user query and perform similarity search against ChromaDB.
 
-    Returns top-K chunks that pass the relevance threshold,
-    sorted by descending relevance score.
-
-    Args:
-        query: The user's natural-language question.
-        top_k: Number of results to retrieve. Defaults to TOP_K_RESULTS (5).
-        threshold: Minimum relevance score (0–1). Defaults to SIMILARITY_THRESHOLD (0.3).
-
-    Returns:
-        A list of dicts, each containing:
+    Returns a list of dicts, each containing:
           - page_content (str): The chunk text.
           - metadata (dict): scheme_name, source_url, scrape_date, section, etc.
           - relevance_score (float): Cosine similarity score.
         Returns an empty list if no results pass the threshold or
         the vector store is unavailable.
+
+    Args:
+        query: The user's natural-language question.
+        top_k: Number of results to retrieve. Defaults to TOP_K_RESULTS (5).
+        threshold: Minimum relevance score (0–1). Defaults to SIMILARITY_THRESHOLD (0.3).
+        scheme_name: If provided, restricts results to chunks whose metadata
+                     'scheme_name' matches this value exactly. Use when the
+                     user is chatting in the context of a specific fund.
     """
     if not query or not query.strip():
         logger.warning("Empty query received. Returning no results.")
@@ -72,14 +73,36 @@ def retrieve(
         return []
 
     try:
-        # similarity_search_with_relevance_scores returns List[(Document, float)]
-        # where float is the relevance score (higher = more similar)
-        results = vectorstore.similarity_search_with_relevance_scores(
-            query=query,
+        # When scheme_name is provided, rewrite the query to include the fund name
+        # so the embedding model produces a vector closer to that fund's data.
+        effective_query = query
+        if scheme_name and scheme_name.strip():
+            sname = scheme_name.strip()
+            # Only prepend if the user's query doesn't already mention the scheme
+            if sname.lower() not in query.lower():
+                effective_query = f"{sname}: {query}"
+            logger.info(f"Scheme-scoped retrieval for '{sname}', effective query: '{effective_query}'")
+
+        # Use similarity_search_with_score directly — Chroma's implementation
+        # accepts `filter` as an explicit named parameter and maps it to ChromaDB's
+        # `where` clause. This is more reliable than relying on **kwargs passthrough
+        # via the base class's similarity_search_with_relevance_scores.
+        chroma_filter = None
+        if scheme_name and scheme_name.strip():
+            chroma_filter = {"scheme_name": {"$eq": scheme_name.strip()}}
+
+        raw_results = vectorstore.similarity_search_with_score(
+            query=effective_query,
             k=k,
+            filter=chroma_filter,
         )
+
+        # Convert distance scores to relevance scores (0-1 range, higher = better).
+        # LangChain Chroma uses L2 distance by default: relevance = 1 - dist/sqrt(2)
+        relevance_fn = vectorstore._select_relevance_score_fn()
+        results = [(doc, relevance_fn(score)) for doc, score in raw_results]
     except Exception as e:
-        logger.error(f"Similarity search failed: {e}")
+        logger.error(f"Similarity search failed: {e}", exc_info=True)
         return []
 
     if not results:

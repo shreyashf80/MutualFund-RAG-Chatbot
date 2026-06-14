@@ -33,6 +33,7 @@ llm_client = GroqClient()
 
 class QueryRequest(BaseModel):
     query: str
+    scheme_name: Optional[str] = None  # If provided, restricts retrieval to this scheme only
 
 class QueryResponse(BaseModel):
     status: str
@@ -79,8 +80,9 @@ async def process_query(request: QueryRequest):
             return QueryResponse(**refusal)
 
         # Step 4: Handle Factual (RAG Pipeline)
-        # a. Retrieve
-        chunks = retrieve(query)
+        # a. Retrieve — pass scheme_name filter if provided so results
+        #    are scoped to the fund the user is currently viewing.
+        chunks = retrieve(query, scheme_name=request.scheme_name)
         
         # b. Check if we have chunks
         if not chunks:
@@ -90,8 +92,9 @@ async def process_query(request: QueryRequest):
         # c. Build Context
         context = build_context(chunks)
 
-        # d. Build Prompt
-        system_prompt, user_prompt = build_prompt(query, context)
+        # d. Build Prompt — inject active scheme so the LLM is explicitly
+        #    told which fund the user is asking about.
+        system_prompt, user_prompt = build_prompt(query, context, scheme_name=request.scheme_name)
 
         # e. Generate via LLM
         raw_answer = llm_client.generate(system_prompt, user_prompt)
