@@ -9,8 +9,8 @@ export default function About() {
             <span className="material-symbols-outlined text-3xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-on-surface tracking-tight">About WealthFact</h1>
-            <p className="text-primary mt-1 font-medium">Instant facts, zero fiction.</p>
+            <h1 className="text-3xl font-bold text-on-surface tracking-tight">About Groww</h1>
+            <p className="text-primary mt-1 font-medium">Your Mutual Fund Assistant</p>
           </div>
         </div>
 
@@ -21,7 +21,7 @@ export default function About() {
               Platform Capabilities
             </h2>
             <p>
-              WealthFact is an enterprise-grade AI assistant designed exclusively to deliver factual, instantaneous insights on HDFC Mutual Fund schemes. Powered by a robust Retrieval-Augmented Generation (RAG) architecture, the platform ensures that every response is strictly grounded in official, verified data sources without hallucination.
+              Groww Mutual Fund Assistant is an AI-powered tool designed exclusively to deliver factual, instantaneous insights on HDFC Mutual Fund schemes. Powered by a robust Retrieval-Augmented Generation (RAG) architecture, the platform ensures that every response is strictly grounded in official, verified data sources without hallucination.
             </p>
           </section>
 
@@ -56,7 +56,7 @@ export default function About() {
               Compliance & Scope
             </h2>
             <p className="text-sm">
-              The WealthFact platform operates under strict factual constraints. It is programmed to <strong>never</strong> provide personalized investment advice, predict future market returns, or offer subjective fund comparisons. If a specific metric is missing from the authorized database, the platform will safely refuse to answer rather than estimate.
+              The Groww Mutual Fund Assistant operates under strict factual constraints. It is programmed to <strong>never</strong> provide personalized investment advice, predict future market returns, or offer subjective fund comparisons. If a specific metric is missing from the authorized database, the platform will safely refuse to answer rather than estimate.
             </p>
           </section>
         </div>

@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "WealthFact",
-  description: "Factual Information about HDFC Mutual Funds",
+  title: "Groww - Mutual Fund Assistant",
+  description: "AI-powered assistant for HDFC Mutual Fund facts and insights",
   icons: {
     icon: "/logo.svg",
   },

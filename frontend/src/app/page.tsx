@@ -89,7 +89,7 @@ export default function Home() {
     } catch {
       setMessages(prev => [...prev, {
         role: "bot",
-        content: "Network error: Unable to connect to the WealthFact servers. Please try again later.",
+        content: "Network error: Unable to connect to the Groww servers. Please try again later.",
         type: 'refusal'
       }]);
     } finally {
@@ -163,13 +163,13 @@ export default function Home() {
             <span className="material-symbols-outlined">menu</span>
           </button>
           <a onClick={resetChat} className="flex items-center gap-1.5 md:gap-2.5 cursor-pointer select-none">
-            <img src="/logo.svg" alt="WealthFact Logo" className="w-10 h-10 md:w-12 md:h-12" />
+            <img src="/logo.svg" alt="Groww Logo" className="w-8 h-8 md:w-10 md:h-10" />
             <div className="flex flex-col md:flex-row md:items-baseline md:gap-3">
-              <h1 className="text-2xl md:text-[32px] font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-fixed leading-tight">
-                WealthFact
+              <h1 className="text-2xl md:text-[32px] font-extrabold tracking-tight text-white leading-tight">
+                Groww
               </h1>
               <span className="text-on-surface-variant/60 text-[13px] md:text-sm font-normal tracking-wider mt-0.5 md:mt-0">
-                Instant facts, zero fiction
+                Mutual Fund Assistant
               </span>
             </div>
           </a>
